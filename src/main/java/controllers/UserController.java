@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import models.User;
@@ -25,10 +26,12 @@ import ninja.Context;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
+import ninja.Router;
 import ninja.params.PathParam;
 import ninja.validation.JSR303Validation;
 import ninja.validation.Validation;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -44,6 +47,9 @@ public class UserController {
     @Inject
     UserDao userDao;
 
+    @Inject
+    Router route;
+    
 	private int id=0;
     
     public UserController() {}
@@ -61,12 +67,11 @@ public class UserController {
     public Result create(Context context, @JSR303Validation User user, Validation validation){
     	if(validation.hasViolations()){
     		flashError(context, user);
-    		return Results.redirect("/user/new");
+    		return Results.redirect(route.getReverseRoute(UserController.class, "newUser"));
     	}
-    	
     	userDao.save(user);
     	context.getFlashScope().put("success", "save.success");
-    	return Results.redirect("/user");
+    	return Results.redirect(route.getReverseRoute(UserController.class, "index"));
     }
     
     public Result editUser(@PathParam("id") int userId){
@@ -77,15 +82,16 @@ public class UserController {
     
     @FilterWith(AuthenticityFilter.class)
     public Result update(Context context, @JSR303Validation User user, Validation validation){
-    	
+    	Map<String, Object> parameterMap=Maps.newHashMap();
     	user.setId(this.id);
 	    if(validation.hasViolations()){
 	   		flashError(context, user);
-	   		return Results.redirect("/user/edit/"+this.id);
+	   		parameterMap.put("id", this.id);
+	   		return Results.redirect(route.getReverseRoute(UserController.class, "editUser", parameterMap));
 	   	}    	
 	   	userDao.saveOrUpdate(user);
     	context.getFlashScope().put("success", "update.success");
-    	return Results.redirect("/user");
+    	return Results.redirect(route.getReverseRoute(UserController.class, "index"));
     }
     
     @FilterWith(AuthenticityFilter.class)
@@ -93,7 +99,7 @@ public class UserController {
     	user.setId(this.id);
     	userDao.delete(user);
     	context.getFlashScope().put("success", "delete.success");
-    	return Results.redirect("/user");
+    	return Results.redirect(route.getReverseRoute(UserController.class, "index"));
     }
     
     private void flashError(Context context, User user){
