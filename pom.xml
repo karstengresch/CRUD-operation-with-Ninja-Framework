@@ -152,7 +152,7 @@
                 </includes>
             </resource>
         </resources>
-	  <finalName>app.jar</finalName>
+	  <finalName>app</finalName>
     </build>
     <dependencies>
         <dependency>
