@@ -23,7 +23,6 @@
         </includes>
       </resource>
     </resources>
-    <finalName>app.jar</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
